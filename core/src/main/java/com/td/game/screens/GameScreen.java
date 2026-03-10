@@ -87,6 +87,12 @@ public class GameScreen implements Screen {
     private ModelInstance gateInstance;
     private ModelInstance coreSphereInstance;
     private float coreFlashTimer;
+    private float coreBaseX;
+    private float coreBaseY;
+    private float coreBaseZ;
+    private float coreScale;
+    private float coreBobTimer;
+    private static final float GATE_MODEL_SCALE_MULTIPLIER = 1.0f;
     private Texture staffInfoPanelTexture;
     private Texture mergeInfoPanelTexture;
     private Texture inventoryInfoPanelTexture;
@@ -270,7 +276,7 @@ public class GameScreen implements Screen {
             float gDepth = gateBounds.getDepth();
             float gMax = Math.max(gWidth, gDepth);
             float gScale = (gMax > 0) ? (Constants.TILE_SIZE * 0.95f) / gMax : 1f;
-            gScale *= GATE_MODEL_SCALE_MULTIPLIER;
+            gScale *= 2.2f;
 
             float firstTileLeftEdgeX = (sx * Constants.TILE_SIZE) - (Constants.TILE_SIZE * 0.5f);
             float gateHalfWidthX = (gWidth * gScale) * 0.5f;
@@ -291,9 +297,10 @@ public class GameScreen implements Screen {
             float cDepth = coreBounds.getDepth();
             float cMax = Math.max(cWidth, cDepth);
             float cScale = (cMax > 0) ? (Constants.TILE_SIZE * 0.95f) / cMax : 1f;
+            cScale *= 1.1f;
 
             coreSphereInstance.transform.setToTranslation(
-                    ex * Constants.TILE_SIZE, 1.0f, ez * Constants.TILE_SIZE).scl(cScale);
+                    ex * Constants.TILE_SIZE, 1.25f, ez * Constants.TILE_SIZE).scl(cScale);
 
             coreBaseX = ex * Constants.TILE_SIZE;
             coreBaseZ = ez * Constants.TILE_SIZE;
@@ -1619,6 +1626,11 @@ public class GameScreen implements Screen {
         return null;
     }
 
+    private void showAugmentSelection() {
+        augmentChoiceActive = true;
+        rollAugments();
+    }
+
     private void rollAugments() {
         Array<Integer> available = new Array<>();
         for (int i = 0; i <= 7; i++) {
@@ -2505,6 +2517,12 @@ public class GameScreen implements Screen {
                 }
             }
             return false;
+        }
+    }
+
+    public void killAllEnemies() {
+        if (waveManager != null) {
+            waveManager.killAllEnemies();
         }
     }
 
