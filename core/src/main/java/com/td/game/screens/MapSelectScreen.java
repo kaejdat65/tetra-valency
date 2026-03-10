@@ -292,6 +292,20 @@ public class MapSelectScreen implements Screen {
                 dispose();
                 return true;
             }
+            if (continueABtn.contains(screenX, y) && com.td.game.systems.SaveManager.hasSave(GameMap.MapType.ELEMENTAL_CASTLE)) {
+                game.audio.playClick();
+                game.audio.stopMenuMusic();
+                game.setScreen(new GameScreen(game, GameMap.MapType.ELEMENTAL_CASTLE, true));
+                dispose();
+                return true;
+            }
+            if (continueBBtn.contains(screenX, y) && com.td.game.systems.SaveManager.hasSave(GameMap.MapType.DESERT_OASIS)) {
+                game.audio.playClick();
+                game.audio.stopMenuMusic();
+                game.setScreen(new GameScreen(game, GameMap.MapType.DESERT_OASIS, true));
+                dispose();
+                return true;
+            }
             return false;
         }
     }
