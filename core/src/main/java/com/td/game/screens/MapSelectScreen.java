@@ -102,11 +102,21 @@ public class MapSelectScreen implements Screen {
         drawCard(mapA, hoverA);
         drawCard(mapB, hoverB);
 
-        drawButton(newGameABtn, newGameABtn.contains(Gdx.input.getX(), mouseY));
-        drawDisabledButton(continueABtn);
+        boolean hasSaveA = com.td.game.systems.SaveManager.hasSave(GameMap.MapType.ELEMENTAL_CASTLE);
+        boolean hasSaveB = com.td.game.systems.SaveManager.hasSave(GameMap.MapType.DESERT_OASIS);
+
+        if (hasSaveA) {
+            drawButton(continueABtn, continueABtn.contains(Gdx.input.getX(), mouseY));
+        } else {
+            drawDisabledButton(continueABtn);
+        }
 
         drawButton(newGameBBtn, newGameBBtn.contains(Gdx.input.getX(), mouseY));
-        drawDisabledButton(continueBBtn);
+        if (hasSaveB) {
+            drawButton(continueBBtn, continueBBtn.contains(Gdx.input.getX(), mouseY));
+        } else {
+            drawDisabledButton(continueBBtn);
+        }
         drawButton(backBtn, backBtn.contains(Gdx.input.getX(), mouseY));
         shapes.end();
 
@@ -119,12 +129,12 @@ public class MapSelectScreen implements Screen {
 
         textFont.setColor(new Color(0.16f, 0.11f, 0.06f, 1f));
         drawCentered(textFont, "NEW GAME", newGameABtn.x, newGameABtn.y + 34f, newGameABtn.width);
-        textFont.setColor(new Color(0.5f, 0.45f, 0.4f, 1f));
+        textFont.setColor(hasSaveA ? new Color(0.16f, 0.11f, 0.06f, 1f) : new Color(0.5f, 0.45f, 0.4f, 1f));
         drawCentered(textFont, "CONTINUE", continueABtn.x, continueABtn.y + 34f, continueABtn.width);
 
         textFont.setColor(new Color(0.16f, 0.11f, 0.06f, 1f));
         drawCentered(textFont, "NEW GAME", newGameBBtn.x, newGameBBtn.y + 34f, newGameBBtn.width);
-        textFont.setColor(new Color(0.5f, 0.45f, 0.4f, 1f));
+        textFont.setColor(hasSaveB ? new Color(0.16f, 0.11f, 0.06f, 1f) : new Color(0.5f, 0.45f, 0.4f, 1f));
         drawCentered(textFont, "CONTINUE", continueBBtn.x, continueBBtn.y + 34f, continueBBtn.width);
 
         drawCentered(textFont, "BACK", backBtn.x, backBtn.y + 40f, backBtn.width);
