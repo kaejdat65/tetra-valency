@@ -2046,10 +2046,12 @@ public class GameScreen implements Screen {
         // Check game over conditions
         if (economyManager.isGameOver()) {
             gameOver = true;
+            com.td.game.systems.SaveManager.deleteSave(mapType);
             return;
         }
         if (waveManager.areAllWavesComplete() && waveManager.getAliveEnemyCount() == 0) {
             gameWon = true;
+            com.td.game.systems.SaveManager.deleteSave(mapType);
             return;
         }
 
