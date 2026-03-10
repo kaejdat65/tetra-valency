@@ -269,6 +269,10 @@ public class Inventory implements Disposable {
         return slotSize;
     }
 
+    public float getPadding() {
+        return padding;
+    }
+
     public void save(com.td.game.systems.SaveData data) {
         data.inventoryOrbs.clear();
         for (int i = 0; i < MAX_ORBS; i++) {

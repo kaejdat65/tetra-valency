@@ -87,6 +87,11 @@ public class GameScreen implements Screen {
     private ModelInstance gateInstance;
     private ModelInstance coreSphereInstance;
     private float coreFlashTimer;
+    private float coreBobTimer;
+    private float coreBaseX;
+    private float coreBaseY;
+    private float coreBaseZ;
+    private float coreScale = 1f;
     private Texture staffInfoPanelTexture;
     private Texture mergeInfoPanelTexture;
     private Texture inventoryInfoPanelTexture;
@@ -175,6 +180,7 @@ public class GameScreen implements Screen {
     private float staffAuraRadius = 8f;
     private static final int MERGE_COST = 20;
     private static final float INFO_PANEL_SHIFT_DOWN = 100f;
+    private static final float GATE_MODEL_SCALE_MULTIPLIER = 1.0f;
     public GameScreen(TowerDefenseGame game) {
         this(game, GameMap.MapType.ELEMENTAL_CASTLE, false);
     }
@@ -296,6 +302,7 @@ public class GameScreen implements Screen {
                     ex * Constants.TILE_SIZE, 1.0f, ez * Constants.TILE_SIZE).scl(cScale);
 
             coreBaseX = ex * Constants.TILE_SIZE;
+            coreBaseY = 1.0f;
             coreBaseZ = ez * Constants.TILE_SIZE;
             coreScale = cScale;
         } catch (Exception e) {
@@ -413,6 +420,12 @@ public class GameScreen implements Screen {
     public void showMessage(String msg) {
         this.uiMessage = msg;
         this.uiMessageTimer = 2.0f;
+    }
+
+    public void killAllEnemies() {
+        if (waveManager != null) {
+            waveManager.killAllEnemies();
+        }
     }
 
     @Override
@@ -1644,6 +1657,11 @@ public class GameScreen implements Screen {
             augmentOptionA = MathUtils.random(0, 7);
             augmentOptionB = MathUtils.random(0, 7);
         }
+    }
+
+    private void showAugmentSelection() {
+        rollAugments();
+        augmentChoiceActive = true;
     }
 
     private void giveRandomAugment() {
