@@ -24,4 +24,20 @@ public class SaveManager {
             com.badlogic.gdx.Gdx.app.error("SaveManager", "Failed to save game", e);
         }
     }
+
+    public static SaveData load(com.td.game.map.GameMap.MapType mapType) {
+        try {
+            String path = getSaveFilePath(mapType);
+            com.badlogic.gdx.files.FileHandle file = com.badlogic.gdx.Gdx.files.external(path);
+            if (file.exists()) {
+                String jsonStr = file.readString();
+                SaveData data = SaveData.fromJson(jsonStr);
+                com.badlogic.gdx.Gdx.app.log("SaveManager", "Game loaded successfully from " + path);
+                return data;
+            }
+        } catch (Exception e) {
+            com.badlogic.gdx.Gdx.app.error("SaveManager", "Failed to load game", e);
+        }
+        return null;
+    }
 }
