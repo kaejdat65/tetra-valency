@@ -262,8 +262,18 @@ public class Player implements Disposable {
         return position;
     }
 
-    public boolean isMoving() {
-        return isMoving;
+    public void save(com.td.game.systems.SaveData data) {
+        data.playerX = position.x;
+        data.playerY = position.y;
+        data.playerZ = position.z;
+    }
+
+    public void load(com.td.game.systems.SaveData data) {
+        position.set(data.playerX, data.playerY, data.playerZ);
+        this.startPos.set(position);
+        this.targetPos.set(position);
+        this.isMoving = false;
+        updateTransform();
     }
 
     @Override
