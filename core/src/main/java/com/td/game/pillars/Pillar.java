@@ -141,6 +141,30 @@ public class Pillar implements Disposable {
         bonusAttackSpeedMult = s;
     }
 
+    public void save(com.td.game.systems.SaveData.PillarSaveData pData) {
+        pData.type = this.type.name();
+        pData.x = this.position.x;
+        pData.y = this.position.y;
+        pData.z = this.position.z;
+        pData.currentElement = this.currentElement != null ? this.currentElement.name() : null;
+        pData.firstOrb = this.firstOrb != null ? this.firstOrb.name() : null;
+        pData.active = this.active;
+        pData.bonusDamageMult = this.bonusDamageMult;
+        pData.bonusRangeMult = this.bonusRangeMult;
+        pData.bonusAttackSpeedMult = this.bonusAttackSpeedMult;
+    }
+
+    public void load(com.td.game.systems.SaveData.PillarSaveData pData) {
+        this.position.set(pData.x, pData.y, pData.z);
+        this.currentElement = pData.currentElement != null ? Element.valueOf(pData.currentElement) : null;
+        this.firstOrb = pData.firstOrb != null ? Element.valueOf(pData.firstOrb) : null;
+        this.active = pData.active;
+        this.bonusDamageMult = pData.bonusDamageMult;
+        this.bonusRangeMult = pData.bonusRangeMult;
+        this.bonusAttackSpeedMult = pData.bonusAttackSpeedMult;
+        updateModel();
+    }
+
     @Override
     public void dispose() {
     }
