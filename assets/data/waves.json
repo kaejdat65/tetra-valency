@@ -1,0 +1,482 @@
+{
+    "waves": [
+        {
+            "wave": 1,
+            "enemyCount": 12,
+            "types": [
+                "TYPE_PINK_BLOB"
+            ],
+            "spawnInterval": 1.96
+        },
+        {
+            "wave": 2,
+            "enemyCount": 14,
+            "types": [
+                "TYPE_PINK_BLOB"
+            ],
+            "spawnInterval": 1.92
+        },
+        {
+            "wave": 3,
+            "enemyCount": 16,
+            "types": [
+                "TYPE_PINK_BLOB"
+            ],
+            "spawnInterval": 1.88
+        },
+        {
+            "wave": 4,
+            "enemyCount": 18,
+            "types": [
+                "TYPE_PINK_BLOB"
+            ],
+            "spawnInterval": 1.84
+        },
+        {
+            "wave": 5,
+            "enemyCount": 20,
+            "types": [
+                "TYPE_PINK_BLOB"
+            ],
+            "spawnInterval": 1.8
+        },
+        {
+            "wave": 6,
+            "enemyCount": 22,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT"
+            ],
+            "spawnInterval": 1.76
+        },
+        {
+            "wave": 7,
+            "enemyCount": 24,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT"
+            ],
+            "spawnInterval": 1.72
+        },
+        {
+            "wave": 8,
+            "enemyCount": 26,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT"
+            ],
+            "spawnInterval": 1.68
+        },
+        {
+            "wave": 9,
+            "enemyCount": 28,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT"
+            ],
+            "spawnInterval": 1.64
+        },
+        {
+            "wave": 10,
+            "enemyCount": 45,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT"
+            ],
+            "spawnInterval": 1.28
+        },
+        {
+            "wave": 11,
+            "enemyCount": 32,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT"
+            ],
+            "spawnInterval": 1.56
+        },
+        {
+            "wave": 12,
+            "enemyCount": 34,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT"
+            ],
+            "spawnInterval": 1.52
+        },
+        {
+            "wave": 13,
+            "enemyCount": 36,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT"
+            ],
+            "spawnInterval": 1.48
+        },
+        {
+            "wave": 14,
+            "enemyCount": 38,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT"
+            ],
+            "spawnInterval": 1.44
+        },
+        {
+            "wave": 15,
+            "enemyCount": 40,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT"
+            ],
+            "spawnInterval": 1.4
+        },
+        {
+            "wave": 16,
+            "enemyCount": 42,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 1.36
+        },
+        {
+            "wave": 17,
+            "enemyCount": 44,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 1.32
+        },
+        {
+            "wave": 18,
+            "enemyCount": 46,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 1.28
+        },
+        {
+            "wave": 19,
+            "enemyCount": 48,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 1.24
+        },
+        {
+            "wave": 20,
+            "enemyCount": 75,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 0.96
+        },
+        {
+            "wave": 21,
+            "enemyCount": 52,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 1.16
+        },
+        {
+            "wave": 22,
+            "enemyCount": 54,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 1.12
+        },
+        {
+            "wave": 23,
+            "enemyCount": 56,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 1.08
+        },
+        {
+            "wave": 24,
+            "enemyCount": 58,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 1.04
+        },
+        {
+            "wave": 25,
+            "enemyCount": 60,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 1.0
+        },
+        {
+            "wave": 26,
+            "enemyCount": 62,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 0.96
+        },
+        {
+            "wave": 27,
+            "enemyCount": 64,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 0.92
+        },
+        {
+            "wave": 28,
+            "enemyCount": 66,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 0.88
+        },
+        {
+            "wave": 29,
+            "enemyCount": 68,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 0.84
+        },
+        {
+            "wave": 30,
+            "enemyCount": 105,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 0.64
+        },
+        {
+            "wave": 31,
+            "enemyCount": 72,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 0.76
+        },
+        {
+            "wave": 32,
+            "enemyCount": 74,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 0.72
+        },
+        {
+            "wave": 33,
+            "enemyCount": 76,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 0.68
+        },
+        {
+            "wave": 34,
+            "enemyCount": 78,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 0.64
+        },
+        {
+            "wave": 35,
+            "enemyCount": 80,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 0.6
+        },
+        {
+            "wave": 36,
+            "enemyCount": 82,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 0.56
+        },
+        {
+            "wave": 37,
+            "enemyCount": 84,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 0.52
+        },
+        {
+            "wave": 38,
+            "enemyCount": 86,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 0.5
+        },
+        {
+            "wave": 39,
+            "enemyCount": 88,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 0.5
+        },
+        {
+            "wave": 40,
+            "enemyCount": 135,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 0.4
+        },
+        {
+            "wave": 41,
+            "enemyCount": 92,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 0.5
+        },
+        {
+            "wave": 42,
+            "enemyCount": 94,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 0.5
+        },
+        {
+            "wave": 43,
+            "enemyCount": 96,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 0.5
+        },
+        {
+            "wave": 44,
+            "enemyCount": 98,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 0.5
+        },
+        {
+            "wave": 45,
+            "enemyCount": 100,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 0.5
+        },
+        {
+            "wave": 46,
+            "enemyCount": 102,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 0.5
+        },
+        {
+            "wave": 47,
+            "enemyCount": 104,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 0.5
+        },
+        {
+            "wave": 48,
+            "enemyCount": 106,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 0.5
+        },
+        {
+            "wave": 49,
+            "enemyCount": 108,
+            "types": [
+                "TYPE_PINK_BLOB",
+                "TYPE_BAT",
+                "TYPE_GOLEM"
+            ],
+            "spawnInterval": 0.5
+        },
+        {
+            "wave": 50,
+            "enemyCount": 1,
+            "types": [
+                "TYPE_DEMON"
+            ],
+            "spawnInterval": 2.0
+        }
+    ]
+}

@@ -126,8 +126,8 @@ public class Enemy implements Disposable {
                 if (isFlying && anim.id.toLowerCase(java.util.Locale.ROOT).contains("fly")) {
                     animId = anim.id;
                     break;
-                } else if (!isFlying && (anim.id.toLowerCase(java.util.Locale.ROOT).contains("walk") || 
-                           anim.id.toLowerCase(java.util.Locale.ROOT).contains("move"))) {
+                } else if (!isFlying && (anim.id.toLowerCase(java.util.Locale.ROOT).contains("walk") ||
+                        anim.id.toLowerCase(java.util.Locale.ROOT).contains("move"))) {
                     animId = anim.id;
                     break;
                 }
@@ -164,31 +164,31 @@ public class Enemy implements Disposable {
         }
     }
 
-    // not working with the enemy models
-    public void renderHealthBar(ShapeRenderer shapeRenderer) {
-        if (!alive) return;
+    public void renderHealthBar(ShapeRenderer shapeRenderer, com.badlogic.gdx.graphics.Camera camera) {
+        if (!alive)
+            return;
 
-        float barWidth = 1.2f;
-        float barHeight = 0.15f;
-        float barX = position.x - barWidth / 2f;
+        Vector3 screenPos = camera.project(new Vector3(position.x, position.y + (isFlying ? 3.0f : 2.5f), position.z));
 
-        float yOffset = isFlying ? 2.0f : 1.2f;
-        float barY = position.y + yOffset;
-        float barZ = position.z;
+        // Don't draw if behind camera
+        if (screenPos.z < 0 || screenPos.z > 1)
+            return;
 
-        shapeRenderer.setColor(0.2f, 0.2f, 0.2f, 0.9f);
-        shapeRenderer.box(barX, barY, barZ, barWidth, barHeight, 0.05f);
+        float barWidth = 40f;
+        float barHeight = 6f;
+        float barX = screenPos.x - barWidth / 2f;
+        float barY = screenPos.y;
+
+        shapeRenderer.setColor(0.1f, 0.1f, 0.1f, 0.9f);
+        shapeRenderer.rect(barX, barY, barWidth, barHeight);
 
         Color healthColor;
         if (element != null) {
-
             healthColor = new Color(element.getR(), element.getG(), element.getB(), 1f);
             if (armor > 0) {
-  
-                healthColor.mul(0.7f, 0.7f, 0.7f, 1f);
+                healthColor.mul(0.6f, 0.6f, 0.6f, 1f); // Darker
             }
         } else {
-
             float healthPercent = health / maxHealth;
             if (healthPercent > 0.5f) {
                 healthColor = Color.GREEN;
@@ -198,10 +198,10 @@ public class Enemy implements Disposable {
                 healthColor = Color.RED;
             }
         }
-        
+
         shapeRenderer.setColor(healthColor);
         float healthWidth = barWidth * (health / maxHealth);
-        shapeRenderer.box(barX, barY, barZ, healthWidth, barHeight, 0.05f);
+        shapeRenderer.rect(barX, barY, healthWidth, barHeight);
     }
 
     public void setElement(Element element) {
@@ -257,12 +257,12 @@ public class Enemy implements Disposable {
 
             if (direction.len2() > 0.01f) {
                 float targetRotation = (float) Math.toDegrees(Math.atan2(-direction.x, -direction.z));
-                
+
                 // Apply blind rotation noise
                 if (blindTimer > 0) {
                     targetRotation += blindRotationNoise * (float) Math.sin(blindTimer * 10f);
                 }
-                
+
                 float diff = targetRotation - this.rotation;
                 while (diff > 180)
                     diff -= 360;
@@ -273,13 +273,13 @@ public class Enemy implements Disposable {
 
             // Calculate speed with all multipliers
             float actualSpeed = baseSpeed * slowMultiplier * rootSlowMultiplier;
-            
+
             // Apply confusion speed variance
             if (confusionTimer > 0) {
                 float variance = (float) Math.sin(confusionTimer * 5f) * confusionSpeedVariance;
                 actualSpeed *= (1f + variance);
             }
-            
+
             position.add(direction.scl(actualSpeed * deltaTime));
             walkTimer += actualSpeed * deltaTime;
 
@@ -304,9 +304,9 @@ public class Enemy implements Disposable {
         if (modelInstance != null) {
             float scale = Constants.TILE_SIZE / 2.0f;
             float yOffset = isFlying ? 2f * scale : 0.25f * scale;
-            
+
             modelInstance.transform.setToTranslation(position.x, position.y + yOffset, position.z);
-            
+
             if (animationController == null && alive && freezeTimer <= 0) {
                 if (isFlying) {
                     float bob = (float) Math.sin(walkTimer * 5f) * 0.3f * scale;
@@ -316,7 +316,7 @@ public class Enemy implements Disposable {
                     modelInstance.transform.translate(0, bob, 0);
                 }
             }
-            
+
             modelInstance.transform.scl(modelScaleMultiplier * visualScaleMultiplier);
             modelInstance.transform.rotate(Vector3.Y, rotation + 180f);
 
@@ -349,7 +349,7 @@ public class Enemy implements Disposable {
         if (drenchTimer > 0) {
             drenchTimer -= deltaTime;
         }
-        
+
         if (poisonTimer > 0) {
             poisonTimer -= deltaTime;
 
@@ -359,7 +359,7 @@ public class Enemy implements Disposable {
                 poisonStacks = 0;
             }
         }
-        
+
         if (rootTimer > 0) {
             rootTimer -= deltaTime;
             if (rootTimer <= 0) {
@@ -368,21 +368,21 @@ public class Enemy implements Disposable {
                 rootArmorBonus = 0;
             }
         }
-        
+
         if (blindTimer > 0) {
             blindTimer -= deltaTime;
             if (blindTimer <= 0) {
                 blindRotationNoise = 0;
             }
         }
-        
+
         if (confusionTimer > 0) {
             confusionTimer -= deltaTime;
             if (confusionTimer <= 0) {
                 confusionSpeedVariance = 0;
             }
         }
-        
+
         if (regenBlockTimer > 0) {
             regenBlockTimer -= deltaTime;
         }
@@ -394,26 +394,26 @@ public class Enemy implements Disposable {
 
     public void takeDamage(float damage, Element attackerElement) {
         hitTimer = 0.1f;
-        
+
         float armorReduction = armor / (armor + 100f);
         float actualDamage = damage * (1f - armorReduction);
-        
+
         // Element damage multiplier
         if (attackerElement != null && this.element != null) {
             float multiplier = com.td.game.utils.CombatUtils.getDamageMultiplier(attackerElement, this.element);
             actualDamage *= multiplier;
         }
-        
+
         // Drench effect: increases lightning/light damage
         if (drenchTimer > 0 && attackerElement == Element.LIGHT) {
             actualDamage *= drenchMultiplier;
         }
-        
+
         // Armor melt effect
         if (armorMeltTimer > 0) {
             actualDamage *= armorMeltMultiplier;
         }
-        
+
         // Shield absorption
         if (shield > 0) {
             if (shield >= actualDamage) {
@@ -424,9 +424,9 @@ public class Enemy implements Disposable {
                 shield = 0;
             }
         }
-        
+
         health -= actualDamage;
-        
+
         if (health <= 0) {
             health = 0;
             alive = false;
@@ -451,17 +451,17 @@ public class Enemy implements Disposable {
         this.burnTimer = duration;
         this.burnDamage = damagePerSecond;
     }
-    
+
     public void applyDrench(float duration) {
         this.drenchTimer = duration;
     }
-    
+
     public void applyPoison(float duration, float damagePerSecond, int stacks) {
         this.poisonTimer = Math.max(this.poisonTimer, duration);
         this.poisonDamage = damagePerSecond;
         this.poisonStacks = Math.min(this.poisonStacks + stacks, 10);
     }
-    
+
     public void applyRoot(float duration, float slowAmount, float armorBonus) {
         if (rootTimer <= 0) {
 
@@ -560,31 +560,31 @@ public class Enemy implements Disposable {
     public boolean isFrozen() {
         return freezeTimer > 0;
     }
-    
+
     public boolean isDrenched() {
         return drenchTimer > 0;
     }
-    
+
     public boolean isPoisoned() {
         return poisonTimer > 0;
     }
-    
+
     public boolean isRooted() {
         return rootTimer > 0;
     }
-    
+
     public boolean isBlinded() {
         return blindTimer > 0;
     }
-    
+
     public boolean isConfused() {
         return confusionTimer > 0;
     }
-    
+
     public boolean hasRegenBlock() {
         return regenBlockTimer > 0;
     }
-    
+
     public int getPoisonStacks() {
         return poisonStacks;
     }
