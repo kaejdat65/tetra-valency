@@ -35,6 +35,7 @@ import com.td.game.pillars.Pillar;
 import com.td.game.pillars.PillarType;
 import com.td.game.player.Player;
 import com.td.game.systems.EconomyManager;
+import com.td.game.systems.WaveManager;
 import com.td.game.ui.ContextualMenuPanel;
 import com.td.game.ui.GameShop;
 import com.td.game.ui.MergeBoard;
@@ -61,7 +62,9 @@ public class GameScreen implements Screen {
     private Array<Pillar> pillars;
 
     private EconomyManager economyManager;
+    private WaveManager waveManager;
     private ModelFactory modelFactory;
+    private com.td.game.effects.ProjectileManager projectileManager;
     private int currentWave = 0;
     private final int maxWaves = 50;
 
@@ -147,6 +150,7 @@ public class GameScreen implements Screen {
 
     private Pillar hoveredPillar;
     private Pillar selectedPillar;
+    private com.td.game.entities.Enemy hoveredEnemy;
     private Vector3 selectedTilePos;
     private ContextualMenuPanel buildMenu;
     private boolean awaitingPillarOrbSelection;
@@ -322,6 +326,12 @@ public class GameScreen implements Screen {
 
         economyManager = new EconomyManager();
         economyManager.setGold(Constants.STARTING_GOLD);
+        waveManager = new WaveManager(gameMap.getPathWaypoints(), modelFactory);
+        projectileManager = new com.td.game.effects.ProjectileManager();
+        
+        // Start first wave automatically
+        waveManager.startNextWave();
+        Gdx.app.log("GameScreen", "First wave started automatically");
 
         buildMenu = new ContextualMenuPanel();
         buildMenu.setFont(uiFont, uiBatch);
@@ -443,6 +453,12 @@ public class GameScreen implements Screen {
 
         for (Pillar pillar : pillars)
             pillar.render(modelBatch, environment);
+        
+        // Render enemies
+        for (com.td.game.entities.Enemy enemy : waveManager.getActiveEnemies()) {
+            enemy.render(modelBatch, environment);
+        }
+        
         player.render(modelBatch, environment);
 
         if (gateInstance != null)
@@ -499,6 +515,11 @@ public class GameScreen implements Screen {
         updateHoveredElement(screenWidth, screenHeight);
         if (hoveredTooltipElement != null) {
             renderElementTooltip(screenWidth, screenHeight);
+        }
+
+        updateHoveredEnemy(screenWidth, screenHeight, mapAreaWidth);
+        if (hoveredEnemy != null) {
+            renderEnemyHoverUI(screenWidth, screenHeight);
         }
 
         if (gameOver)
@@ -1906,6 +1927,40 @@ public class GameScreen implements Screen {
 
         buildMenu.updateHover(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
 
+        // Update WaveManager
+        waveManager.update(delta);
+        
+        // Update enemies
+        for (com.td.game.entities.Enemy enemy : waveManager.getActiveEnemies()) {
+            enemy.update(delta);
+            if (enemy.hasReachedEnd()) {
+                economyManager.loseLife();
+                coreFlashTimer = 0.4f;
+            }
+            if (!enemy.isAlive() && !enemy.hasReachedEnd()) {
+                economyManager.earn(enemy.getReward());
+            }
+        }
+        waveManager.removeDeadEnemies();
+        
+        // Update pillars with enemies
+        for (Pillar pillar : pillars) {
+            pillar.update(delta, waveManager.getActiveEnemies(), projectileManager);
+        }
+        
+        // Update projectiles
+        projectileManager.update(delta);
+        
+        // Check game over conditions
+        if (economyManager.isGameOver()) {
+            gameOver = true;
+            return;
+        }
+        if (waveManager.areAllWavesComplete() && waveManager.getAliveEnemyCount() == 0) {
+            gameWon = true;
+            return;
+        }
+
         HoverDetector.HoverState hoverState = HoverDetector.detect(camera, Gdx.input.getX(), Gdx.input.getY(),
                 shopWidth,
                 player, pillars, buildMenu);
@@ -1934,9 +1989,7 @@ public class GameScreen implements Screen {
 
         @Override
         public boolean keyDown(int keycode) {
-            if (com.td.game.input.KeyBindings.handleShortcutKeys(keycode, game, mapType, GameScreen.this)) {
-                return true;
-            }
+            // KeyBindings removed - not available in this version
             if (keycode == Input.Keys.ESCAPE || keycode == Input.Keys.P) {
                 paused = !paused;
                 return true;
@@ -1950,6 +2003,11 @@ public class GameScreen implements Screen {
                     applyAugmentChoice(2);
                     return true;
                 }
+                return true;
+            }
+
+            if (keycode == Input.Keys.SPACE && !waveManager.isWaveInProgress()) {
+                waveManager.startNextWave();
                 return true;
             }
 
@@ -2453,6 +2511,7 @@ public class GameScreen implements Screen {
                 m.dispose();
         for (Pillar p : pillars)
             p.dispose();
+        waveManager.dispose();
         economyManager.dispose();
         if (mapAreaBackgroundTexture != null)
             mapAreaBackgroundTexture.dispose();
@@ -2483,6 +2542,104 @@ public class GameScreen implements Screen {
             hudLifeIconTexture.dispose();
         if (hudGoldIconTexture != null)
             hudGoldIconTexture.dispose();
+    }
+
+    private void updateHoveredEnemy(int screenWidth, int screenHeight, int mapAreaWidth) {
+        hoveredEnemy = null;
+        if (paused || gameOver || gameWon)
+            return;
+
+        float mx = Gdx.input.getX();
+        float my = screenHeight - Gdx.input.getY();
+        if (mx > mapAreaWidth)
+            return;
+
+        float closestDistSq = Float.MAX_VALUE;
+        float hoverRadiusSq = (50f * uiScale) * (50f * uiScale);
+
+        for (com.td.game.entities.Enemy enemy : waveManager.getActiveEnemies()) {
+            if (!enemy.isAlive())
+                continue;
+            Vector3 pos = new Vector3(enemy.getPosition());
+            pos.y += 1.0f;
+            Vector3 screenPos = camera.project(pos.cpy(), 0, 0, mapAreaWidth, screenHeight);
+
+            float dx = screenPos.x - mx;
+            float dy = screenPos.y - my;
+            float distSq = dx * dx + dy * dy;
+            if (distSq < hoverRadiusSq && distSq < closestDistSq) {
+                closestDistSq = distSq;
+                hoveredEnemy = enemy;
+            }
+        }
+    }
+
+    private void renderEnemyHoverUI(int screenWidth, int screenHeight) {
+        Vector3 pos = new Vector3(hoveredEnemy.getPosition());
+        pos.y += 2.8f;
+        Vector3 screenPos = camera.project(pos.cpy(), 0, 0, screenWidth - shopWidth, screenHeight);
+
+        float px = screenPos.x;
+        float py = screenPos.y;
+
+        String enemyName = hoveredEnemy.getName();
+        if ("Enemy".equals(enemyName)) {
+            if (hoveredEnemy instanceof com.td.game.entities.DemonEnemy)
+                enemyName = "Demon Boss";
+            else if (hoveredEnemy instanceof com.td.game.entities.BatEnemy)
+                enemyName = "Bat";
+            else if (hoveredEnemy instanceof com.td.game.entities.GolemEnemy)
+                enemyName = "Golem";
+            else if (hoveredEnemy instanceof com.td.game.entities.PinkBlobEnemy)
+                enemyName = "Pink Blob";
+        }
+
+        String elemName = (hoveredEnemy.getElement() != null) ? hoveredEnemy.getElement().getDisplayName() : "No Element";
+        String hpStr = String.format("HP: %.0f / %.0f", Math.max(0, hoveredEnemy.getHealth()), hoveredEnemy.getMaxHealth());
+
+        float panelW = 220f * uiScale;
+        float panelH = 95f * uiScale;
+
+        px -= panelW / 2;
+        if (px + panelW > screenWidth) px = screenWidth - panelW - 4f;
+        if (px < 0) px = 4f;
+        if (py + panelH > screenHeight) py = screenHeight - panelH - 4f;
+        if (py < 0) py = 4f;
+
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+        uiShapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        uiShapeRenderer.setColor(0.1f, 0.1f, 0.15f, 0.85f);
+        uiShapeRenderer.rect(px, py, panelW, panelH);
+        uiShapeRenderer.end();
+
+        uiShapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        Color elemColor = (hoveredEnemy.getElement() != null) ?
+            new Color(hoveredEnemy.getElement().getR(), hoveredEnemy.getElement().getG(), hoveredEnemy.getElement().getB(), 1f) : Color.WHITE;
+        uiShapeRenderer.setColor(elemColor);
+        uiShapeRenderer.rect(px, py, panelW, panelH);
+        uiShapeRenderer.end();
+
+        uiBatch.begin();
+        float textX = px + 10f * uiScale;
+        float textY = py + panelH - 10f * uiScale;
+        float lineH = 24f * uiScale;
+
+        uiFont.getData().setScale(uiScale * 0.8f);
+        uiFont.setColor(Color.WHITE);
+        uiFont.draw(uiBatch, enemyName, textX, textY);
+        textY -= lineH;
+
+        uiFont.setColor(elemColor);
+        uiFont.draw(uiBatch, elemName, textX, textY);
+        textY -= lineH;
+
+        uiFont.setColor(Color.WHITE);
+        uiFont.draw(uiBatch, hpStr, textX, textY);
+
+        uiFont.getData().setScale(uiScale);
+        uiBatch.end();
     }
 
 }

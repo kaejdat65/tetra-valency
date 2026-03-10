@@ -158,10 +158,50 @@ public class ModelFactory implements Disposable {
         return loadModel("3dmodels/CORE.g3db");
     }
 
+    public Model loadPinkBlobModel() {
+        // Pink blob - simple sphere
+        Material material = new Material(ColorAttribute.createDiffuse(Color.PINK));
+        return modelBuilder.createSphere(0.4f, 0.6f, 0.4f, 10, 10, material, attributes);
+    }
+
+    public Model loadGolemModel() {
+        // Golem - box-based character
+        modelBuilder.begin();
+        Material bodyMaterial = new Material(ColorAttribute.createDiffuse(Color.GRAY));
+        modelBuilder.part("body", GL20.GL_TRIANGLES, attributes, bodyMaterial).box(0.8f, 1f, 0.6f);
+        Material headMaterial = new Material(ColorAttribute.createDiffuse(new Color(0.6f, 0.6f, 0.6f, 1f)));
+        MeshPartBuilder head = modelBuilder.part("head", GL20.GL_TRIANGLES, attributes, headMaterial);
+        head.setVertexTransform(new com.badlogic.gdx.math.Matrix4().translate(0, 0.8f, 0));
+        head.box(0.5f, 0.4f, 0.4f);
+        return modelBuilder.end();
+    }
+
+    public Model loadBatModel() {
+        // Bat - dark sphere (flying enemy)
+        Material material = new Material(ColorAttribute.createDiffuse(new Color(0.2f, 0.2f, 0.25f, 1f)));
+        return modelBuilder.createSphere(0.4f, 0.6f, 0.4f, 10, 10, material, attributes);
+    }
+
+    public Model loadDemonModel() {
+        // Demon boss - larger box with wings
+        modelBuilder.begin();
+        Material bodyMaterial = new Material(ColorAttribute.createDiffuse(Color.RED));
+        modelBuilder.part("body", GL20.GL_TRIANGLES, attributes, bodyMaterial).box(0.6f, 0.3f, 1f);
+        Material wingMaterial = new Material(ColorAttribute.createDiffuse(new Color(0.8f, 0.2f, 0.2f, 1f)));
+        MeshPartBuilder wing1 = modelBuilder.part("wing1", GL20.GL_TRIANGLES, attributes, wingMaterial);
+        wing1.setVertexTransform(new com.badlogic.gdx.math.Matrix4().translate(0.6f, 0.1f, 0).rotate(0, 0, 1, 15));
+        wing1.box(0.8f, 0.05f, 0.4f);
+        MeshPartBuilder wing2 = modelBuilder.part("wing2", GL20.GL_TRIANGLES, attributes, wingMaterial);
+        wing2.setVertexTransform(new com.badlogic.gdx.math.Matrix4().translate(-0.6f, 0.1f, 0).rotate(0, 0, 1, -15));
+        wing2.box(0.8f, 0.05f, 0.4f);
+        return modelBuilder.end();
+    }
+
     private Model loadModel(String internalPath) {
         FileHandle file = Gdx.files.internal(internalPath);
         if (!file.exists()) {
-            file = Gdx.files.internal("assets/" + internalPath);
+            Gdx.app.error("ModelFactory", "Model file not found: " + internalPath);
+            throw new RuntimeException("Model file not found: " + internalPath);
         }
         return new G3dModelLoader(new UBJsonReader()).loadModel(file);
     }
