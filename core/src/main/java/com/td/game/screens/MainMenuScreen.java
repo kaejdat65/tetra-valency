@@ -114,7 +114,7 @@ public class MainMenuScreen implements Screen {
             batch.draw(logoTexture, (w - logoW) * 0.5f, h * 0.58f, logoW, logoH);
         }
 
-        drawMenuLabel("Play", newGameBtn);
+        drawMenuLabel("New Game", newGameBtn);
         drawMenuLabel("Leaderboard", leaderboardBtn);
         drawMenuLabel("Options", optionsBtn);
         drawMenuLabel("Credits", creditsBtn);

@@ -180,7 +180,7 @@ public class GameScreen implements Screen {
     private float staffAuraRadius = 8f;
     private static final int MERGE_COST = 20;
     private static final float INFO_PANEL_SHIFT_DOWN = 100f;
-    private static final float GATE_MODEL_SCALE_MULTIPLIER = 1.0f;
+    private static final float GATE_MODEL_SCALE_MULTIPLIER = 2.0f;
     public GameScreen(TowerDefenseGame game) {
         this(game, GameMap.MapType.ELEMENTAL_CASTLE, false);
     }
@@ -425,6 +425,15 @@ public class GameScreen implements Screen {
     public void killAllEnemies() {
         if (waveManager != null) {
             waveManager.killAllEnemies();
+        }
+    }
+
+    public void skipToNextWave() {
+        if (waveManager != null) {
+            waveManager.killAllEnemies();
+            if (!waveManager.isWaveInProgress() && !waveManager.areAllWavesComplete()) {
+                waveManager.startNextWave();
+            }
         }
     }
 
@@ -1098,7 +1107,7 @@ public class GameScreen implements Screen {
         uiShapeRenderer.rect(seeAugmentsBtnX, seeAugmentsBtnY, seeAugmentsBtnW, seeAugmentsBtnH);
 
         boolean canStartWave = !waveManager.isWaveInProgress() && !waveManager.areAllWavesComplete();
-        uiShapeRenderer.setColor(canStartWave ? new Color(0.2f, 0.65f, 0.2f, 1f) : new Color(0.5f, 0.5f, 0.5f, 1f));
+        uiShapeRenderer.setColor(canStartWave ? new Color(0.56f, 0.43f, 0.33f, 1f) : new Color(0.5f, 0.5f, 0.5f, 1f));
         uiShapeRenderer.rect(playBtnX, playBtnY, playBtnW, playBtnH);
         uiShapeRenderer.end();
 
@@ -2038,7 +2047,11 @@ public class GameScreen implements Screen {
         waveManager.update(delta);
 
         if (!waveManager.isWaveInProgress() && !waveManager.areAllWavesComplete()) {
-            if (autoplayEnabled) {
+            if (waveManager.getCurrentWave() > 0 && waveManager.getCurrentWave() % 10 == 0 && !waveManager.hasShownAugmentForWave(waveManager.getCurrentWave())) {
+                showAugmentSelection();
+                waveManager.setShownAugmentForWave(waveManager.getCurrentWave(), true);
+                saveGameState();
+            } else if (autoplayEnabled) {
                 waveManager.startNextWave();
             }
         }
@@ -2282,8 +2295,7 @@ public class GameScreen implements Screen {
                         if (waveManager.areAllWavesComplete()) {
                             gameWon = true;
                         } else if (!augmentChoiceActive) {
-                            showAugmentSelection();
-                            saveGameState();
+                            waveManager.startNextWave();
                         }
                     }
                     return true;

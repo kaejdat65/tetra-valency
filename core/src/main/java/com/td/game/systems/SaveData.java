@@ -9,6 +9,7 @@ public class SaveData {
     // WaveManager state
     public int currentWave;
     public int enemiesSpawned;
+    public Array<Integer> wavesShownAugments;
 
     // EconomyManager state
     public int gold;
@@ -61,6 +62,7 @@ public class SaveData {
         inventoryOrbs = new Array<>();
         acquiredAugments = new Array<>();
         pillars = new Array<>();
+        wavesShownAugments = new Array<>();
     }
 
     public String toJson() {
