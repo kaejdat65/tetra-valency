@@ -22,7 +22,7 @@ public class KeyBindings {
             return true;
         } else if (keycode == Input.Keys.NUM_4) {
             if (currentScreen instanceof com.td.game.screens.GameScreen) {
-                ((com.td.game.screens.GameScreen) currentScreen).killAllEnemies();
+                ((com.td.game.screens.GameScreen) currentScreen).skipToNextWave();
             }
             return true;
         }

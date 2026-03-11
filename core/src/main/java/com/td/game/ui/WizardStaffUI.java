@@ -53,11 +53,23 @@ public class WizardStaffUI implements Disposable {
     }
 
     public void save(com.td.game.systems.SaveData data) {
-        data.staffOrb = this.equippedElement != null ? this.equippedElement.name() : null;
+        if (this.equippedElement != null) {
+            data.staffOrb = this.equippedElement.name();
+            com.badlogic.gdx.Gdx.app.log("WizardStaffUI", "Saving staffOrb: " + data.staffOrb);
+        } else {
+            data.staffOrb = null;
+            com.badlogic.gdx.Gdx.app.log("WizardStaffUI", "Saving staffOrb as NULL");
+        }
     }
 
     public void load(com.td.game.systems.SaveData data) {
-        this.equippedElement = data.staffOrb != null ? Element.valueOf(data.staffOrb) : null;
+        if (data.staffOrb != null) {
+            this.equippedElement = Element.valueOf(data.staffOrb);
+            com.badlogic.gdx.Gdx.app.log("WizardStaffUI", "Loaded staffOrb: " + data.staffOrb);
+        } else {
+            this.equippedElement = null;
+            com.badlogic.gdx.Gdx.app.log("WizardStaffUI", "Loaded staffOrb as NULL");
+        }
     }
 
     @Override

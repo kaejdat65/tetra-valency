@@ -24,6 +24,7 @@ public class WaveManager implements Disposable {
     private float spawnInterval;
     private boolean waveInProgress;
     private boolean allWavesComplete;
+    private com.badlogic.gdx.utils.IntSet wavesShownAugments = new com.badlogic.gdx.utils.IntSet();
 
     private Array<Vector3> pathWaypoints;
     private Array<Enemy> activeEnemies;
@@ -267,11 +268,33 @@ public class WaveManager implements Disposable {
     public void save(SaveData data) {
         data.currentWave = this.currentWave;
         data.enemiesSpawned = this.enemiesSpawned;
+        data.wavesShownAugments = new Array<>();
+        for (com.badlogic.gdx.utils.IntSet.IntSetIterator it = wavesShownAugments.iterator(); it.hasNext; ) {
+            data.wavesShownAugments.add(it.next());
+        }
     }
 
     public void load(SaveData data) {
         this.currentWave = data.currentWave;
         this.enemiesSpawned = data.enemiesSpawned;
+        this.wavesShownAugments.clear();
+        if (data.wavesShownAugments != null) {
+            for (int wave : data.wavesShownAugments) {
+                this.wavesShownAugments.add(wave);
+            }
+        }
+    }
+
+    public boolean hasShownAugmentForWave(int wave) {
+        return wavesShownAugments.contains(wave);
+    }
+
+    public void setShownAugmentForWave(int wave, boolean shown) {
+        if (shown) {
+            wavesShownAugments.add(wave);
+        } else {
+            wavesShownAugments.remove(wave);
+        }
     }
 
     @Override

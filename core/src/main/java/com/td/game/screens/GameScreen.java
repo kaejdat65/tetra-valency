@@ -180,7 +180,7 @@ public class GameScreen implements Screen {
     private float staffAuraRadius = 8f;
     private static final int MERGE_COST = 20;
     private static final float INFO_PANEL_SHIFT_DOWN = 100f;
-    private static final float GATE_MODEL_SCALE_MULTIPLIER = 1.0f;
+    private static final float GATE_MODEL_SCALE_MULTIPLIER = 2.0f;
     public GameScreen(TowerDefenseGame game) {
         this(game, GameMap.MapType.ELEMENTAL_CASTLE, false);
     }
@@ -425,6 +425,15 @@ public class GameScreen implements Screen {
     public void killAllEnemies() {
         if (waveManager != null) {
             waveManager.killAllEnemies();
+        }
+    }
+
+    public void skipToNextWave() {
+        if (waveManager != null) {
+            waveManager.killAllEnemies();
+            if (!waveManager.isWaveInProgress() && !waveManager.areAllWavesComplete()) {
+                waveManager.startNextWave();
+            }
         }
     }
 
@@ -827,7 +836,7 @@ public class GameScreen implements Screen {
         glyphLayout.setText(uiFontLarge, livesStr);
         float livesEndX = 70f * uiScale + glyphLayout.width;
 
-        String waveText = "WAVE " + currentWave + "/" + maxWaves;
+        String waveText = "WAVE " + (waveManager != null ? waveManager.getCurrentWave() : 0) + "/" + maxWaves;
         glyphLayout.setText(uiFontLarge, waveText);
         float waveStartX = mapAreaWidth - glyphLayout.width - 28f * uiScale;
         uiFontLarge.setColor(hudTopColor);
@@ -1098,7 +1107,7 @@ public class GameScreen implements Screen {
         uiShapeRenderer.rect(seeAugmentsBtnX, seeAugmentsBtnY, seeAugmentsBtnW, seeAugmentsBtnH);
 
         boolean canStartWave = !waveManager.isWaveInProgress() && !waveManager.areAllWavesComplete();
-        uiShapeRenderer.setColor(canStartWave ? new Color(0.2f, 0.65f, 0.2f, 1f) : new Color(0.5f, 0.5f, 0.5f, 1f));
+        uiShapeRenderer.setColor(canStartWave ? Color.WHITE : new Color(0.5f, 0.5f, 0.5f, 1f));
         uiShapeRenderer.rect(playBtnX, playBtnY, playBtnW, playBtnH);
         uiShapeRenderer.end();
 
@@ -1117,12 +1126,11 @@ public class GameScreen implements Screen {
                     seeAugmentsBtnY + seeAugmentsBtnH * 0.78f);
         }
 
-        uiFontLarge.setColor(canStartWave ? Color.WHITE : Color.DARK_GRAY);
-        String playText = waveManager.areAllWavesComplete() ? "DONE"
-                : (waveManager.isWaveInProgress() ? "WAVE " + waveManager.getCurrentWave() : "PLAY");
+        uiFontLarge.setColor(canStartWave ? Color.BLACK : Color.DARK_GRAY);
+        String playText = waveManager.areAllWavesComplete() ? "DONE" : "PLAY";
         glyphLayout.setText(uiFontLarge, playText);
         if (glyphLayout.width > playBtnW - 4f) {
-            uiFont.setColor(canStartWave ? Color.WHITE : Color.DARK_GRAY);
+            uiFont.setColor(canStartWave ? Color.BLACK : Color.DARK_GRAY);
             glyphLayout.setText(uiFont, playText);
             uiFont.draw(uiBatch, playText, playBtnX + (playBtnW - glyphLayout.width) * 0.5f,
                     playBtnY + (playBtnH + glyphLayout.height) * 0.5f);
@@ -1705,6 +1713,10 @@ public class GameScreen implements Screen {
             player.load(data);
             inventory.load(data);
             staffUI.load(data);
+            if (staffUI.hasOrb()) {
+                int idx = staffUI.getEquippedElement().ordinal();
+                player.setStaffOrbModel(new com.badlogic.gdx.graphics.g3d.ModelInstance(orbModels[idx]), staffUI.getEquippedElement());
+            }
 
             if (data.mergeSlot1 != null) mergeBoard.setSlot1Element(Element.valueOf(data.mergeSlot1));
             if (data.mergeSlot2 != null) mergeBoard.setSlot2Element(Element.valueOf(data.mergeSlot2));
@@ -2038,7 +2050,11 @@ public class GameScreen implements Screen {
         waveManager.update(delta);
 
         if (!waveManager.isWaveInProgress() && !waveManager.areAllWavesComplete()) {
-            if (autoplayEnabled) {
+            if (waveManager.getCurrentWave() > 0 && waveManager.getCurrentWave() % 10 == 0 && !waveManager.hasShownAugmentForWave(waveManager.getCurrentWave())) {
+                showAugmentSelection();
+                waveManager.setShownAugmentForWave(waveManager.getCurrentWave(), true);
+                saveGameState();
+            } else if (autoplayEnabled) {
                 waveManager.startNextWave();
             }
         }
@@ -2139,6 +2155,7 @@ public class GameScreen implements Screen {
                 } else if (inventory.hasSelection()) {
                     inventory.cancelSelection();
                 } else {
+                    saveGameState();
                     Gdx.app.exit();
                 }
                 return true;
@@ -2208,10 +2225,12 @@ public class GameScreen implements Screen {
                 } else if (isInRect(screenX, flippedY, btnX, menuY, btnW, btnH)) {
                     game.audio.playClick();
                     game.audio.playMenuMusic();
+                    saveGameState();
                     game.setScreen(new MainMenuScreen(game));
                     dispose();
                 } else if (isInRect(screenX, flippedY, btnX, quitY, btnW, btnH)) {
                     game.audio.playClick();
+                    saveGameState();
                     Gdx.app.exit();
                 }
                 return true;
@@ -2282,8 +2301,8 @@ public class GameScreen implements Screen {
                         if (waveManager.areAllWavesComplete()) {
                             gameWon = true;
                         } else if (!augmentChoiceActive) {
-                            showAugmentSelection();
                             saveGameState();
+                            waveManager.startNextWave();
                         }
                     }
                     return true;
@@ -2515,8 +2534,12 @@ public class GameScreen implements Screen {
                         }
 
                         if (!occupied) {
-                            selectedTilePos = new Vector3(sx, 0, sz);
-                            buildMenu.show(screenX, flippedY, true);
+                            if (!waveManager.isWaveInProgress()) {
+                                selectedTilePos = new Vector3(sx, 0, sz);
+                                buildMenu.show(screenX, flippedY, true);
+                            } else {
+                                showMessage("Cannot build during a wave!");
+                            }
                         }
                         return true;
                     }
@@ -2571,7 +2594,11 @@ public class GameScreen implements Screen {
         mergeBoard.setSlotSize(invSlot);
 
         float staffX = width - shopWidth + (shopWidth - staffSize) * 0.5f;
-        staffUI = new WizardStaffUI((int) staffX, (int) staffY, (int) staffSize, (int) staffSize);
+        if (staffUI == null) {
+            staffUI = new WizardStaffUI((int) staffX, (int) staffY, (int) staffSize, (int) staffSize);
+        } else {
+            staffUI.setBounds((int) staffX, (int) staffY, (int) staffSize, (int) staffSize);
+        }
     }
 
     private float calculateShopWidth(int screenWidth) {

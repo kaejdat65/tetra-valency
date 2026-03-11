@@ -111,6 +111,7 @@ public class MapSelectScreen implements Screen {
             drawDisabledButton(continueABtn);
         }
 
+        drawButton(newGameABtn, newGameABtn.contains(Gdx.input.getX(), mouseY));
         drawButton(newGameBBtn, newGameBBtn.contains(Gdx.input.getX(), mouseY));
         if (hasSaveB) {
             drawButton(continueBBtn, continueBBtn.contains(Gdx.input.getX(), mouseY));
