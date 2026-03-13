@@ -26,6 +26,7 @@ public class Pillar implements Disposable {
     private float bonusAttackSpeedMult = 1f;
 
     private float attackTimer = 0f;
+    private float goldAccumulator = 0f;
 
     public Pillar(PillarType type, Vector3 position, ModelFactory modelFactory) {
         this.type = type;
@@ -87,13 +88,39 @@ public class Pillar implements Disposable {
         float attackCooldown = 1.0f / (type.getAttackSpeedMult() * bonusAttackSpeedMult);
         attackTimer -= delta;
 
+        // Gold: passive gold income, no projectiles
+        if (currentElement == com.td.game.elements.Element.GOLD) {
+            goldAccumulator += delta;
+            if (goldAccumulator >= 1.0f) {
+                int goldEarned = (int) (5 * bonusDamageMult * type.getDamageMult());
+                screen.earnGold(goldEarned);
+                goldAccumulator -= 1.0f;
+            }
+            return;
+        }
+
+        // Life: revive dead enemies as allies walking backward
+        if (currentElement == com.td.game.elements.Element.LIFE) {
+            if (attackTimer <= 0) {
+                float range = getAttackRange();
+                for (com.td.game.entities.Enemy enemy : screen.getWaveManager().getActiveEnemies()) {
+                    if (!enemy.isAlive() && !enemy.isRevived() && enemy.getPosition().dst(position) <= range) {
+                        enemy.reviveAsAlly();
+                        attackTimer = attackCooldown;
+                        break;
+                    }
+                }
+            }
+            return;
+        }
+
+        // Normal attack for all other elements
         if (attackTimer <= 0) {
             com.td.game.entities.Enemy target = findTarget(screen.getWaveManager());
             if (target != null) {
                 float damage = 20.0f * bonusDamageMult * type.getDamageMult();
-                float projSpeed = 15.0f; // Tile units per sec
+                float projSpeed = 15.0f;
 
-                // Add top height offset for spawn
                 Vector3 spawnPos = position.cpy();
                 spawnPos.y += 2.0f;
 

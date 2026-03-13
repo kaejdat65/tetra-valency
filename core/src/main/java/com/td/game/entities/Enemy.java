@@ -75,6 +75,10 @@ public class Enemy implements Disposable {
 
     protected float knockbackDistance;
 
+    protected boolean revived;
+    protected boolean ally;
+    protected float distanceTraveled;
+
     public Enemy(float maxHealth, float speed, int reward) {
         this.maxHealth = maxHealth;
         this.health = maxHealth;
@@ -115,6 +119,9 @@ public class Enemy implements Disposable {
         this.greedMultiplier = 1f;
         this.regenBlockTimer = 0;
         this.knockbackDistance = 0;
+        this.revived = false;
+        this.ally = false;
+        this.distanceTraveled = 0;
     }
 
     public void setModel(Model model) {
@@ -287,6 +294,7 @@ public class Enemy implements Disposable {
 
             position.add(direction.scl(actualSpeed * deltaTime));
             walkTimer += actualSpeed * deltaTime;
+            distanceTraveled += actualSpeed * deltaTime;
 
             if (position.dst(target) < 0.2f) {
                 currentWaypointIndex++;
@@ -452,8 +460,8 @@ public class Enemy implements Disposable {
         this.stunTimer = Math.max(this.stunTimer, duration);
     }
 
-    public void applyStun(float duration) {
-        this.stunTimer = Math.max(this.stunTimer, duration);
+    public void addFireStack() {
+        this.fireStacks++;
     }
 
     public void applyKnockback(float distance) {
@@ -534,19 +542,6 @@ public class Enemy implements Disposable {
 
     public void applyRegenBlock(float duration) {
         this.regenBlockTimer = duration;
-    }
-
-    public void applyKnockback(float distance) {
-        this.knockbackDistance = distance;
-        // Apply knockback immediately
-        if (currentWaypointIndex > 0 && distance > 0) {
-            // Move back along path
-            int stepsBack = (int) (distance / 2f);
-            currentWaypointIndex = Math.max(0, currentWaypointIndex - stepsBack);
-            if (currentWaypointIndex < waypoints.size) {
-                position.set(waypoints.get(currentWaypointIndex));
-            }
-        }
     }
 
     public void stripShield(float amount) {
@@ -641,6 +636,34 @@ public class Enemy implements Disposable {
 
     public void setVisualScaleMultiplier(float visualScaleMultiplier) {
         this.visualScaleMultiplier = Math.max(0.1f, visualScaleMultiplier);
+    }
+
+    public boolean isRevived() {
+        return revived;
+    }
+
+    public boolean isAlly() {
+        return ally;
+    }
+
+    public void reviveAsAlly() {
+        this.revived = true;
+        this.ally = true;
+        this.alive = true;
+        this.health = maxHealth * 0.5f;
+        this.reachedEnd = false;
+
+        // Reverse the waypoints so it walks from end to start
+        if (waypoints != null && waypoints.size > 1) {
+            Array<Vector3> reversed = new Array<>();
+            for (int i = waypoints.size - 1; i >= 0; i--) {
+                reversed.add(waypoints.get(i));
+            }
+            this.waypoints = reversed;
+            this.currentWaypointIndex = 1;
+            this.position.set(reversed.first());
+            this.distanceTraveled = 0;
+        }
     }
 
     @Override

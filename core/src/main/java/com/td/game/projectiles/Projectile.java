@@ -18,9 +18,15 @@ public class Projectile {
 
     private ModelInstance modelInstance;
 
-    // For Fire AoE
     private WaveManager waveManager;
     private static final float FIRE_AOE_RADIUS = 3.0f;
+
+    // Light beam support
+    private boolean isBeam = false;
+    private Vector3 beamStart;
+    private Vector3 beamEnd;
+    private float beamTimer;
+    private static final float BEAM_DURATION = 0.3f;
 
     public Projectile(Vector3 startPos, Enemy target, Element element, float speed, float damage,
             ModelInstance modelInstance, WaveManager waveManager) {
@@ -33,7 +39,15 @@ public class Projectile {
         this.modelInstance = modelInstance;
         this.waveManager = waveManager;
 
-        if (this.modelInstance != null) {
+        // Light element: instant beam, no travel
+        if (element == Element.LIGHT) {
+            isBeam = true;
+            beamStart = new Vector3(startPos);
+            beamEnd = target.getPosition().cpy();
+            beamEnd.y += 1.0f;
+            beamTimer = BEAM_DURATION;
+            onHit(); // Instant damage
+        } else if (this.modelInstance != null) {
             this.modelInstance.transform.setToTranslation(position);
         }
     }
@@ -42,13 +56,22 @@ public class Projectile {
         if (!active)
             return;
 
+        // Beam just shows VFX and fades
+        if (isBeam) {
+            beamTimer -= delta;
+            if (beamTimer <= 0) {
+                active = false;
+            }
+            return;
+        }
+
         if (target == null || !target.isAlive()) {
             active = false;
             return;
         }
 
         Vector3 targetPos = target.getPosition().cpy();
-        targetPos.y += 1.0f; // Aim at center of body
+        targetPos.y += 1.0f;
 
         Vector3 direction = targetPos.cpy().sub(position).nor();
         position.add(direction.scl(speed * delta));
@@ -57,18 +80,19 @@ public class Projectile {
             modelInstance.transform.setToTranslation(position);
         }
 
-        // Check collision
         if (position.dst(targetPos) < 1.0f) {
             onHit();
         }
     }
 
     private void onHit() {
-        active = false;
+        if (!isBeam) {
+            active = false;
+        }
 
         switch (element) {
             case FIRE:
-                // Deals AoE damage & adds ramping stacks
+                // AoE damage + ramping fire stacks
                 if (waveManager != null) {
                     for (Enemy e : waveManager.getActiveEnemies()) {
                         if (e.isAlive() && e.getPosition().dst(target.getPosition()) <= FIRE_AOE_RADIUS) {
@@ -83,21 +107,59 @@ public class Projectile {
                 break;
 
             case WATER:
-                // Slow effect implementation
+                // Slow effect
                 target.takeDamage(damage, element);
-                target.applySlow(2.0f, 0.5f); // 2 second slow, 50% speed
+                target.applySlow(2.0f, 0.5f);
                 break;
 
             case EARTH:
-                // Stun effect implementation
+                // Stun effect
                 target.takeDamage(damage, element);
-                target.applyStun(1.5f); // 1.5 second stun
+                target.applyStun(1.5f);
                 break;
 
             case AIR:
-                // Knockback effect implementation
+                // Knockback effect
                 target.takeDamage(damage, element);
-                target.applyKnockback(1.5f); // 1.5 tiles knockback distance
+                target.applyKnockback(1.5f);
+                break;
+
+            // ---- HYBRID ELEMENTS ----
+
+            case ICE:
+                // Full freeze (stops movement + animation)
+                target.takeDamage(damage, element);
+                target.applyFreeze(2.5f);
+                break;
+
+            case POISON:
+                // Acid DoT stacks + healing block
+                target.takeDamage(damage * 0.3f, element);
+                target.applyPoison(4.0f, damage * 0.15f, 1);
+                target.applyRegenBlock(5.0f);
+                break;
+
+            case STEAM:
+                // HP%-based knockback: lower HP = more knockback
+                target.takeDamage(damage, element);
+                float hpPercent = target.getHealthPercent();
+                float knockDist = 1.0f + (1.0f - hpPercent) * 3.0f; // 1-4 tiles
+                target.applyKnockback(knockDist);
+                break;
+
+            case LIGHT:
+                // Current HP% based damage (higher HP = more damage), instant beam
+                float currentHpPercent = target.getHealthPercent();
+                float hpBasedDamage = damage * (0.5f + currentHpPercent * 1.5f);
+                target.takeDamage(hpBasedDamage, element);
+                break;
+
+            case GOLD:
+                // Gold pillars don't fire projectiles (handled in Pillar.update)
+                break;
+
+            case LIFE:
+                // Life pillars don't fire projectiles (handled in Pillar.update)
                 break;
 
             default:
@@ -107,12 +169,40 @@ public class Projectile {
     }
 
     public void render(ModelBatch batch, Environment environment) {
-        if (active && modelInstance != null) {
+        if (!active)
+            return;
+
+        if (isBeam) {
+            // Beam rendering is handled by GameScreen's ShapeRenderer
+            return;
+        }
+
+        if (modelInstance != null) {
             batch.render(modelInstance, environment);
         }
     }
 
     public boolean isActive() {
         return active;
+    }
+
+    public boolean isBeam() {
+        return isBeam;
+    }
+
+    public Vector3 getBeamStart() {
+        return beamStart;
+    }
+
+    public Vector3 getBeamEnd() {
+        return beamEnd;
+    }
+
+    public float getBeamTimer() {
+        return beamTimer;
+    }
+
+    public Element getElement() {
+        return element;
     }
 }

@@ -514,6 +514,22 @@ public class GameScreen implements Screen {
 
         modelBatch.end();
 
+        // Render Light beam lines
+        for (com.td.game.projectiles.Projectile proj : activeProjectiles) {
+            if (proj.isBeam() && proj.isActive()) {
+                Vector3 bStart = camera.project(proj.getBeamStart().cpy());
+                Vector3 bEnd = camera.project(proj.getBeamEnd().cpy());
+                if (bStart.z > 0 && bStart.z < 1 && bEnd.z > 0 && bEnd.z < 1) {
+                    uiShapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+                    com.badlogic.gdx.Gdx.gl.glLineWidth(4f);
+                    float alpha = proj.getBeamTimer() / 0.3f;
+                    uiShapeRenderer.setColor(1f, 1f, 0.6f, alpha);
+                    uiShapeRenderer.line(bStart.x, bStart.y, bEnd.x, bEnd.y);
+                    uiShapeRenderer.end();
+                }
+            }
+        }
+
         uiShapeRenderer.getProjectionMatrix().setToOrtho2D(0, 0, screenWidth, screenHeight);
 
         com.badlogic.gdx.graphics.glutils.HdpiUtils.glViewport(0, 0, screenWidth, screenHeight);
@@ -2092,7 +2108,7 @@ public class GameScreen implements Screen {
 
         // Update pillars
         for (Pillar pillar : pillars) {
-            pillar.update(delta);
+            pillar.update(delta, this);
         }
 
         // Check game over conditions
@@ -2590,6 +2606,10 @@ public class GameScreen implements Screen {
         ModelInstance mi = projModel != null ? new ModelInstance(projModel) : null;
         activeProjectiles
                 .add(new com.td.game.projectiles.Projectile(pos, target, element, speed, damage, mi, waveManager));
+    }
+
+    public void earnGold(int amount) {
+        economyManager.earn(amount);
     }
 
     public com.td.game.systems.WaveManager getWaveManager() {
