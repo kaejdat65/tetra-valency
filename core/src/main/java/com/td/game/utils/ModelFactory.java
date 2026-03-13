@@ -146,6 +146,32 @@ public class ModelFactory implements Disposable {
         return createPillarModel(type, null);
     }
 
+    public Model createFireProjectileModel() {
+        Material material = new Material(
+                ColorAttribute.createDiffuse(new Color(1f, 0.4f, 0f, 1f)),
+                new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, 0.8f));
+        return modelBuilder.createSphere(0.4f, 0.4f, 0.4f, 12, 12, material, attributes);
+    }
+
+    public Model createWaterProjectileModel() {
+        Material material = new Material(
+                ColorAttribute.createDiffuse(new Color(0f, 0.5f, 1f, 1f)),
+                new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, 0.6f));
+        return modelBuilder.createSphere(0.5f, 0.5f, 0.5f, 16, 16, material, attributes);
+    }
+
+    public Model createEarthProjectileModel() {
+        Material material = new Material(ColorAttribute.createDiffuse(new Color(0.4f, 0.3f, 0.1f, 1f)));
+        return modelBuilder.createBox(0.4f, 0.4f, 0.4f, material, attributes);
+    }
+
+    public Model createAirProjectileModel() {
+        Material material = new Material(
+                ColorAttribute.createDiffuse(new Color(0.8f, 0.9f, 1f, 1f)),
+                new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, 0.5f));
+        return modelBuilder.createCylinder(0.3f, 0.6f, 0.3f, 8, material, attributes);
+    }
+
     public Model createPlayerModel() {
         return loadModel("3dmodels/Alchemist.g3db");
     }

@@ -25,6 +25,8 @@ public class Pillar implements Disposable {
     private float bonusRangeMult = 1f;
     private float bonusAttackSpeedMult = 1f;
 
+    private float attackTimer = 0f;
+
     public Pillar(PillarType type, Vector3 position, ModelFactory modelFactory) {
         this.type = type;
         this.position = position.cpy();
@@ -78,9 +80,46 @@ public class Pillar implements Disposable {
         return true;
     }
 
-    public void update(float delta) {
-        if (!active)
+    public void update(float delta, com.td.game.screens.GameScreen screen) {
+        if (!active || currentElement == null)
             return;
+
+        float attackCooldown = 1.0f / (type.getAttackSpeedMult() * bonusAttackSpeedMult);
+        attackTimer -= delta;
+
+        if (attackTimer <= 0) {
+            com.td.game.entities.Enemy target = findTarget(screen.getWaveManager());
+            if (target != null) {
+                float damage = 20.0f * bonusDamageMult * type.getDamageMult();
+                float projSpeed = 15.0f; // Tile units per sec
+
+                // Add top height offset for spawn
+                Vector3 spawnPos = position.cpy();
+                spawnPos.y += 2.0f;
+
+                screen.spawnProjectile(spawnPos, target, currentElement, projSpeed, damage);
+                attackTimer = attackCooldown;
+            }
+        }
+    }
+
+    private com.td.game.entities.Enemy findTarget(com.td.game.systems.WaveManager waveManager) {
+        if (waveManager == null)
+            return null;
+        float range = getAttackRange();
+        com.td.game.entities.Enemy bestTarget = null;
+        float shortestDist = Float.MAX_VALUE;
+
+        for (com.td.game.entities.Enemy enemy : waveManager.getActiveEnemies()) {
+            if (enemy.isAlive()) {
+                float dst = enemy.getPosition().dst(position);
+                if (dst <= range && dst < shortestDist) {
+                    shortestDist = dst;
+                    bestTarget = enemy;
+                }
+            }
+        }
+        return bestTarget;
     }
 
     public void render(ModelBatch modelBatch, Environment environment) {
@@ -169,4 +208,3 @@ public class Pillar implements Disposable {
     public void dispose() {
     }
 }
-

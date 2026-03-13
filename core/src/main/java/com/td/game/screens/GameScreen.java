@@ -75,6 +75,9 @@ public class GameScreen implements Screen {
     private Model playerModel;
     private Model[] orbModels;
 
+    private Array<com.td.game.projectiles.Projectile> activeProjectiles;
+    private Model fireProjModel, waterProjModel, earthProjModel, airProjModel;
+
     private ModelInstance validHighlight;
 
     private Texture mapAreaBackgroundTexture;
@@ -348,6 +351,12 @@ public class GameScreen implements Screen {
         shop = new GameShop(screenWidth - shopWidth, 0, shopWidth, screenHeight);
         inventory = new Inventory(screenWidth - shopWidth + panelPadding, 0f);
         inventory.resize(screenWidth, screenHeight);
+
+        activeProjectiles = new Array<>();
+        fireProjModel = modelFactory.createFireProjectileModel();
+        waterProjModel = modelFactory.createWaterProjectileModel();
+        earthProjModel = modelFactory.createEarthProjectileModel();
+        airProjModel = modelFactory.createAirProjectileModel();
 
         float invSlot = inventory.getSlotSize();
         float invPad = inventory.getPadding();
@@ -2383,6 +2392,12 @@ public class GameScreen implements Screen {
                     int panelButton = getPillarPanelButton(screenX, flippedY);
                     if (panelButton == 0) {
                         economyManager.earn(selectedPillar.getType().getPrice() / 2);
+                        Element removed = selectedPillar.getCurrentElement();
+                        if (removed != null) {
+                            if (!inventory.addOrb(removed)) {
+                                showMessage("Inventory Full! Orb destroyed.");
+                            }
+                        }
                         pillars.removeValue(selectedPillar, true);
                         selectedPillar = null;
                         awaitingPillarOrbSelection = false;
@@ -2556,6 +2571,29 @@ public class GameScreen implements Screen {
             }
             return false;
         }
+    }
+
+    public void spawnProjectile(Vector3 pos, com.td.game.entities.Enemy target, Element element, float speed,
+            float damage) {
+        Model projModel = null;
+        if (element == Element.FIRE)
+            projModel = fireProjModel;
+        else if (element == Element.WATER)
+            projModel = waterProjModel;
+        else if (element == Element.EARTH)
+            projModel = earthProjModel;
+        else if (element == Element.AIR)
+            projModel = airProjModel;
+        else
+            projModel = orbModels[element.ordinal()];
+
+        ModelInstance mi = projModel != null ? new ModelInstance(projModel) : null;
+        activeProjectiles
+                .add(new com.td.game.projectiles.Projectile(pos, target, element, speed, damage, mi, waveManager));
+    }
+
+    public com.td.game.systems.WaveManager getWaveManager() {
+        return waveManager;
     }
 
     @Override

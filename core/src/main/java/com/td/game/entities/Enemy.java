@@ -42,6 +42,9 @@ public class Enemy implements Disposable {
 
     protected float slowTimer;
     protected float slowMultiplier;
+
+    protected float stunTimer;
+    protected int fireStacks;
     protected float freezeTimer;
     protected float armorMeltTimer;
     protected float armorMeltMultiplier;
@@ -89,6 +92,8 @@ public class Enemy implements Disposable {
 
         this.slowTimer = 0;
         this.slowMultiplier = 1f;
+        this.stunTimer = 0;
+        this.fireStacks = 0;
         this.freezeTimer = 0;
         this.armorMeltTimer = 0;
         this.armorMeltMultiplier = 1f;
@@ -246,7 +251,7 @@ public class Enemy implements Disposable {
 
         updateEffects(deltaTime);
 
-        if (freezeTimer > 0) {
+        if (freezeTimer > 0 || stunTimer > 0) {
             updateModelPosition();
             return;
         }
@@ -336,6 +341,8 @@ public class Enemy implements Disposable {
         }
         if (freezeTimer > 0)
             freezeTimer -= deltaTime;
+        if (stunTimer > 0)
+            stunTimer -= deltaTime;
         if (armorMeltTimer > 0) {
             armorMeltTimer -= deltaTime;
             if (armorMeltTimer <= 0)
@@ -395,6 +402,9 @@ public class Enemy implements Disposable {
     public void takeDamage(float damage, Element attackerElement) {
         hitTimer = 0.1f;
 
+        // Ramping damage from fire
+        damage = damage * (1f + (fireStacks * 0.1f));
+
         float armorReduction = armor / (armor + 100f);
         float actualDamage = damage * (1f - armorReduction);
 
@@ -435,7 +445,43 @@ public class Enemy implements Disposable {
 
     public void applySlow(float duration, float multiplier) {
         this.slowTimer = duration;
-        this.slowMultiplier = multiplier;
+        this.slowMultiplier = Math.min(this.slowMultiplier, multiplier);
+    }
+
+    public void applyStun(float duration) {
+        this.stunTimer = Math.max(this.stunTimer, duration);
+    }
+
+    public void applyStun(float duration) {
+        this.stunTimer = Math.max(this.stunTimer, duration);
+    }
+
+    public void applyKnockback(float distance) {
+        if (waypoints == null || waypoints.size == 0)
+            return;
+
+        // Move backwards along the path
+        distanceTraveled -= distance;
+        if (distanceTraveled < 0)
+            distanceTraveled = 0;
+
+        // Recalculate segment and position
+        float traveled = 0;
+        for (int i = 0; i < waypoints.size - 1; i++) {
+            Vector3 start = waypoints.get(i);
+            Vector3 end = waypoints.get(i + 1);
+            float segmentLen = start.dst(end);
+
+            if (traveled + segmentLen >= distanceTraveled) {
+                currentWaypointIndex = i + 1;
+                float segmentProgress = (distanceTraveled - traveled) / segmentLen;
+
+                position.set(start).lerp(end, segmentProgress);
+                break;
+            }
+            traveled += segmentLen;
+        }
+
     }
 
     public void applyFreeze(float duration) {
